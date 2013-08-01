@@ -59,103 +59,79 @@ siunits=mathmod.siunits()
 named_units=sorted(mathmod.named_units(),key=str.lower)
                  
 class unitcalc(object):
-  def insert_in_buff(self,data):
+  def start_end_of_last_line(self):
+    start=self.buff.get_iter_at_line(-1)
+    end=self.buff.get_end_iter()
+    return start,end
+  def start_end_of_whole_buffer(self):
+    start=self.buff.get_iter_at_line(0)
+    end=self.buff.get_end_iter()
+    return start,end
+
+  def replace_last_line(self,data):
+    start,end=self.start_end_of_last_line()
+    self.buff.delete(start,end)
     self.buff.insert_at_cursor(data)
     self.view.scroll_mark_onscreen(self.buff.get_insert())
+    current=self.buff.get_iter_at_mark(self.buff.get_insert())
+    self.buff.place_cursor(current)
+
+  def insert_in_express(self,data):
+    self.express.append(data)
+    self.replace_last_line(self.express.pretty_string())
     
   def token_callback(self,widget,data):
-    self.insert_in_buff(data)
+    self.insert_in_express(data)
 
   def bksp_callback(self,widget):
-    start=self.buff.get_iter_at_line(-1)
-    end=self.buff.get_end_iter()
-    current=self.buff.get_iter_at_mark(self.buff.get_insert())
-    if start.compare(current):
-      self.buff.backspace(current,True,True)
+    self.express.pop()
+    self.replace_last_line(self.express.pretty_string())
     
   def clr_callback(self,widget):
-    start=self.buff.get_iter_at_line(-1)
-    end=self.buff.get_end_iter()
-    current=self.buff.get_iter_at_mark(self.buff.get_insert())
-    if start.compare(current)==0 and end.compare(current)==0:
-      start=self.buff.get_iter_at_line(0)
-    self.buff.delete(start,end)
-
+    if len(self.express):
+      self.express=mathmod.Expression()
+    else:
+      start,end=self.start_end_of_whole_buffer()
+      self.buff.delete(start,end)      
+    self.replace_last_line(self.express.pretty_string())
 
   def evaluate_callback(self,widget):
-    start=self.buff.get_iter_at_line(-1)
-    end=self.buff.get_end_iter()
-    express=self.buff.get_text(start,end)
-    unclosedleft=0
-    unclosedright=0
-    for x in express:
-      if(x==')'):
-        if(unclosedleft==0):
-          unclosedright+=1
-        else:
-          unclosedleft+=-1  
-      if(x=='('):
-        unclosedleft+=1  
-    self.buff.insert(end, unclosedleft*')')
-    start=self.buff.get_iter_at_line(-1)
-    end=self.buff.get_end_iter()
-    self.buff.insert(start, unclosedright*'(')
-    start=self.buff.get_iter_at_line(-1)
-    end=self.buff.get_end_iter()
-    express=self.buff.get_text(start,end)
-    self.buff.insert(end,'=\n')
+    self.express.fix_parentheses()
+    self.replace_last_line(self.express.pretty_string()+'=\n')
     end=self.buff.get_end_iter()
     try:
-      result=self.calcengine.calculate(express)
+      result=self.calcengine.calculate(self.express)
     except ZeroDivisionError:
       self.buff.insert_with_tags_by_name(end,"math error\n","right_just")
-      end=self.buff.get_end_iter()
-      self.buff.insert(end,express)
-#      self.view.scroll_mark_onscreen(self.buff.get_insert())      
-
     except (SyntaxError,TypeError):
       self.buff.insert_with_tags_by_name(end,"syntax error\n","right_just")
-      end=self.buff.get_end_iter()
-      self.buff.insert(end,express)
-#      self.view.scroll_mark_onscreen(self.buff.get_insert())      
-#    except:
-#      self.buff.insert_with_tags_by_name(end,"error\n","right_just")
-#      end=self.buff.get_end_iter()
-#      self.buff.insert(end,express)
-#      self.view.scroll_mark_onscreen(self.buff.get_insert())
+    except:
+      self.buff.insert_with_tags_by_name(end,"error\n","right_just")
     else:
-      self.calcengine.pushback_result(result)
-      self.calcengine.pushback_express(express)      
       self.buff.insert_with_tags_by_name(end,str(result)+"\n","right_just")
+      self.express=mathmod.Expression()
+    self.replace_last_line(self.express.pretty_string())
     self.buff.place_cursor(self.buff.get_end_iter())
-    self.view.scroll_mark_onscreen(self.buff.get_insert())
+    self.view.scroll_mark_onscreen(self.buff.get_insert())      
 
   def move_callback(self,widget,data):
-    start=self.buff.get_iter_at_line(-1)
-    end=self.buff.get_end_iter()
-    current=self.buff.get_iter_at_mark(self.buff.get_insert())
     if(data=='<'):
 #      if start.compare(current):
-#        current.backward_cursor_position() 
-      self.buff.delete(start,end)
-      express=self.calcengine.backward_express()
-      self.insert_in_buff(express)
+#        current.backward_cursor_position()
+      self.express=self.calcengine.backward_express()
+      self.replace_last_line(self.express.pretty_string())
       current=self.buff.get_iter_at_mark(self.buff.get_insert())
     if(data=='>'):
 #      if current.compare(end):
 #        current.forward_cursor_position()
-      self.buff.delete(start,end)
-      express=self.calcengine.forward_express()
-      self.insert_in_buff(express)
+      self.express=self.calcengine.forward_express()
+      self.replace_last_line(self.express.pretty_string())
       current=self.buff.get_iter_at_mark(self.buff.get_insert())
     self.buff.place_cursor(current)
 
-
-
   def ans_callback(self,widget):
-    self.insert_in_buff("ans")
+    self.insert_in_express("ans")
     
-
   def shift_callback(self,widget):
     self.shift=not self.shift
     if(self.shift):
@@ -167,24 +143,23 @@ class unitcalc(object):
 
   def shiftable_callback(self,widget,data):
     if(self.shift):
-      self.insert_in_buff(data[1])
+      self.insert_in_express(data[1])
       self.shift_button.set_active(False)
     else:
-      self.insert_in_buff(data[0])
+      self.insert_in_express(data[0])
 
   def combobox_callback(self,widget,data):
     model=widget.get_model()
     index=widget.get_active()
     if(widget.ignore.count(index) == 0):
-      self.insert_in_buff(model[index][0]+data)      
+      self.insert_in_express(model[index][0]+data)      
       widget.set_active(0)
       
-                
   def __init__(self):
     self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
 
     self.window.set_title("AMUSE Calculator")
-    self.window.set_size_request(480,640)
+    self.window.set_size_request(400,450)
   
     self.window.connect("delete_event", gtk.main_quit)
 
@@ -197,7 +172,7 @@ class unitcalc(object):
     self.view.set_cursor_visible(True)
     self.view.set_wrap_mode(gtk.WRAP_CHAR)
     self.view.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("dark gray"))
-    self.view.modify_font(pango.FontDescription("Monospace 10"))
+    self.view.modify_font(pango.FontDescription("Monospace 14"))
     self.view.set_border_width(3)
     self.view.set_left_margin(3)
     self.view.set_right_margin(3)
@@ -311,6 +286,7 @@ class unitcalc(object):
     self.shift=False
 
     self.calcengine=mathmod.calcengine()
+    self.express=mathmod.Expression()
         
 def main():
     gtk.main()

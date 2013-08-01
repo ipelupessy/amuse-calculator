@@ -1,6 +1,7 @@
 from __future__ import division
 import mpmath as math
 from units import *
+from copy import copy
 
 def sqrt(x):
   if hasattr(x,'unit'):
@@ -68,28 +69,59 @@ def si_prefixes():
       'exa(','zetta(','yotta(','deci(','centi(','milli(','micro(','nano(','pico(',\
       'femto(','atto(','zepto(','yocto(']
 
+class Expression(list):
+  def fix_parentheses(self):
+    unclosedleft=0
+    unclosedright=0
+    express=self.python_string()
+    for x in express:
+      if(x==')'):
+        if(unclosedleft==0):
+          unclosedright+=1
+        else:
+          unclosedleft+=-1  
+      if(x=='('):
+        unclosedleft+=1  
+    self.extend(unclosedleft*[")"])
+    for i in range(unclosedright):
+      self.insert(0,"(")  
+  def python_string(self):
+    return "".join(self)
+  def pretty_string(self):
+    return "".join(self)
+    
+    
 class calcengine(object):
 
   def __init__(self):
     self.ans=0
-    self.express=[]
-    self.i_express=-1
+    self.history=[Expression()]
+    print "1",self.history
+    self._i=0
 
   def pushback_result(self,result):
-    self.ans=result    
+    self.ans=result
 
   def pushback_express(self,express):
-    self.express.append(express)    
-    self.i_express=len(self.express)-1
+    self.history.append(express)
+    if len(self.history)>100: 
+      self.history.pop(0)    
+    self._i=len(self.history)
 
   def forward_express(self):
-    if(self.i_express<len(self.express)-1): self.i_express+=1
-    return self.express[self.i_express]
+    if(self._i<len(self.history)-1): self._i+=1
+    return copy(self.history[self._i])
 
   def backward_express(self):
-    if(self.i_express>0): self.i_express-=1
-    return self.express[self.i_express]
+    if(self._i>1): self._i-=1
+    return copy(self.history[self._i])
 
   def calculate(self,express):
-    return eval(express.replace("ans","self.ans"))
-
+    try:
+      result=eval(express.python_string().replace("ans","self.ans"))
+    except:
+      raise
+    else:
+      self.pushback_result(result)
+      self.pushback_express(express)
+      return result  
