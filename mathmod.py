@@ -96,7 +96,6 @@ class calcengine(object):
   def __init__(self):
     self.ans=0
     self.history=[Expression()]
-    print "1",self.history
     self._i=0
 
   def pushback_result(self,result):
@@ -109,11 +108,13 @@ class calcengine(object):
     self._i=len(self.history)
 
   def forward_express(self):
-    if(self._i<len(self.history)-1): self._i+=1
+    if self._i<len(self.history): self._i+=1
+    if self._i==len(self.history):
+      return Expression()
     return copy(self.history[self._i])
 
   def backward_express(self):
-    if(self._i>1): self._i-=1
+    if(self._i>0): self._i-=1
     return copy(self.history[self._i])
 
   def calculate(self,express):

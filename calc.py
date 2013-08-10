@@ -22,26 +22,30 @@ numpad_buttons=( (0,1,3,4,'0'),
                  (4,5,1,2,'('),
                  (5,6,1,2,')') )
 
-shiftable_buttons=((0,1,1,2,'pi','pi',',',','),
-                   (4,5,0,1,'e','e','j','j'),
+shiftable_buttons=((0,1,1,2,',',',','j','j'),
+                   (5,6,0,1,'e','e','e','e'),
                    (1,2,0,1,'sin','sin(','asin','asin('),
                    (2,3,0,1,'cos','cos(','acos','acos('),
                    (3,4,0,1,'tan','tan(','atan','atan('),
                    (1,2,1,2,'sinh','sinh(','asinh','asinh('),
                    (2,3,1,2,'cosh','cosh(','acosh','acosh('),
-                   (3,4,1,2,'tanh','tanh(','atanh','atanh('))
+                   (3,4,1,2,'tanh','tanh(','atanh','atanh('),
+                   (4,5,1,2,'e^x','e**(','log','log('),                
+                   (4,5,0,1,'10^x','10**(','log10','log10('),
+                   (5,6,1,2,'pi','pi','pi','pi'),
+                   )
 
 scipad_buttons=((2,3,2,3,'x^2','**2'),
                 (3,4,2,3,'sqrt','sqrt('),
                 (4,5,2,3,'x^-1','**-1'),
                 (6,7,0,1,'|','|'),
-                (6,7,1,2,'abs','abs('),
+                (6,7,1,2,'E','E'),
                 (6,7,2,3,'rnd','rnd()'),
 #                (0,1,1,2,'pi','pi'),
 #                (4,5,0,1,'e','e'),
-                (4,5,1,2,'10^x','10**('),                
-                (5,6,0,1,'log','log('),
-                (5,6,1,2,'log10','log10('),
+#                (4,5,1,2,'10^x','10**('),   
+#                (5,6,0,1,'log','log('),
+#                (5,6,1,2,'log10','log10('),
                 (5,6,2,3,'^','**'))
 
 unitpad_buttons=((0,1,1,2,'convert',').convert_to('),
@@ -51,7 +55,7 @@ unitpad_buttons=((0,1,1,2,'convert',').convert_to('),
                  (4,5,1,2,'clean','clean('),
                  (5,6,1,2,'simplify','simplify('))
 
-special_functions=('atan2','fac','cot','coth')
+special_functions=('atan2','fac','cot','coth','complex','abs')
 
 si_prefixes=mathmod.si_prefixes()
 constants=mathmod.constants()
@@ -71,10 +75,12 @@ class unitcalc(object):
   def replace_last_line(self,data):
     start,end=self.start_end_of_last_line()
     self.buff.delete(start,end)
+    self.buff.place_cursor(self.buff.get_end_iter())
     self.buff.insert_at_cursor(data)
     self.view.scroll_mark_onscreen(self.buff.get_insert())
     current=self.buff.get_iter_at_mark(self.buff.get_insert())
     self.buff.place_cursor(current)
+    self.view.grab_focus()
 
   def insert_in_express(self,data):
     self.express.append(data)
@@ -84,7 +90,8 @@ class unitcalc(object):
     self.insert_in_express(data)
 
   def bksp_callback(self,widget):
-    self.express.pop()
+    if self.express:
+      self.express.pop()
     self.replace_last_line(self.express.pretty_string())
     
   def clr_callback(self,widget):
@@ -105,8 +112,8 @@ class unitcalc(object):
       self.buff.insert_with_tags_by_name(end,"math error\n","right_just")
     except (SyntaxError,TypeError):
       self.buff.insert_with_tags_by_name(end,"syntax error\n","right_just")
-    except:
-      self.buff.insert_with_tags_by_name(end,"error\n","right_just")
+    except Exception as ex:
+      self.buff.insert_with_tags_by_name(end,str(ex)+"\n","right_just")
     else:
       self.buff.insert_with_tags_by_name(end,str(result)+"\n","right_just")
       self.express=mathmod.Expression()
