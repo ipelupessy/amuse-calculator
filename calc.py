@@ -166,7 +166,7 @@ class unitcalc(object):
     self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
 
     self.window.set_title("AMUSE Calculator")
-    self.window.set_size_request(400,450)
+    self.window.set_size_request(500,600)
   
     self.window.connect("delete_event", gtk.main_quit)
 
@@ -179,7 +179,7 @@ class unitcalc(object):
     self.view.set_cursor_visible(True)
     self.view.set_wrap_mode(gtk.WRAP_CHAR)
     self.view.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("dark gray"))
-    self.view.modify_font(pango.FontDescription("Monospace 14"))
+    self.view.modify_font(pango.FontDescription("Monospace 12"))
     self.view.set_border_width(3)
     self.view.set_left_margin(3)
     self.view.set_right_margin(3)

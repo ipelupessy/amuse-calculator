@@ -186,7 +186,7 @@ class unit(object):
             other_factor = x.factor
             return this_factor / other_factor
         else:
-            raise Exception("Cannot expres: " + str(x) + " in " + str(self))
+            raise Exception("Cannot express: " + str(x) + " in " + str(self))
       
     def in_(self, x):
         return self.as_quantity_in(x)
