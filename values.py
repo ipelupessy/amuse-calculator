@@ -113,7 +113,7 @@ class ScalarQuantity(Quantity):
     def __str__(self):
         unit_str = str(self.unit)
         if unit_str:
-            print unit_str
+            #print unit_str
             return str(self.number) + ' | ' + unit_str
         else:
             return str(self.number)
