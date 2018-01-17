@@ -8,20 +8,31 @@ def sqrt(x):
     return math.sqrt(x.number) | x.unit**0.5 
   return math.sqrt(x)  
 
-cos=math.cos
-sin=math.sin
-tan=math.tan
-cosh=math.cosh
-sinh=math.sinh
-tanh=math.tanh
-acos=math.acos
-asin=math.asin
-atan=math.atan
+#trigonometric convenience functions which are "unit aware"
+sin=lambda x: math.sin(1.*x)
+cos=lambda x: math.cos(1.*x)
+tan=lambda x: math.tan(1.*x)
+cot=lambda x: math.cot(1.*x)
+
+asin=lambda x: math.asin(x) | rad
+acos=lambda x: math.acos(x) | rad
+atan=lambda x: math.atan(x) | rad
+atan2=lambda x,y: math.atan2(x,y) | rad
+
+#~ cos=math.cos
+#~ sin=math.sin
+#~ tan=math.tan
+#~ cosh=math.cosh
+#~ sinh=math.sinh
+#~ tanh=math.tanh
+#~ acos=math.acos
+#~ asin=math.asin
+#~ atan=math.atan
 acosh=math.acosh
 asinh=math.asinh
 atanh=math.atanh
-atan2=math.atan2
-cot=math.cot
+#~ atan2=math.atan2
+#~ cot=math.cot
 coth=math.coth
 j=math.j
 

@@ -75,9 +75,16 @@ class Quantity(object):
         unit=self.unit.base_unit()
         return self.as_quantity_in(unit)
     
-    def as_quantity_in(self, another_unit): 
-        value_of_unit_in_another_unit = self.unit.as_quantity_in(another_unit)
-        return self.new(self.number * value_of_unit_in_another_unit.number, another_unit)
+    #~ def as_quantity_in(self, another_unit): 
+        #~ value_of_unit_in_another_unit = self.unit.as_quantity_in(another_unit)
+        #~ return self.new(self.number * value_of_unit_in_another_unit.number, another_unit)
+    def as_quantity_in(self, another_unit):
+        if isinstance(another_unit, Quantity):
+            raise exceptions.AmuseException("Cannot expres a unit in a quantity")
+        factor = self.unit.conversion_factor_from(another_unit)
+        #~ print ":",factor,self.number,another_unit
+        return self.new(self.number * factor, another_unit)
+
 
     def value_in(self, unit):
         value_of_unit_in_another_unit = self.unit.value_in(unit)
@@ -148,6 +155,7 @@ class ScalarQuantity(Quantity):
         return self.number * self.unit
 
     def new(self,value,unit):
-        if not unit.base:
-            return value*unit.factor
+        #~ print unit.base,"<<"
+        #~ if not unit.base:
+            #~ return value*unit.factor
         return ScalarQuantity(value, unit)

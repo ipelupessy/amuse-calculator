@@ -20,6 +20,11 @@ W = named('watt', 'W', J / s)
 F = named('farad','F', s**4*A**2*m**(-2)*kg**(-1))
 C = named('coulomb','C', A*s)
 V = named('volt','V', J/C)
+T = named('tesla','T', kg/A/s/s)
+H = named('henry','H', kg * m**2/A**2/s**2)
+S = named('siemens', 'S', A/V)
+Wb = named('weber','Wb', kg * m**2/A**2/s**2)
+Mx = named('maxwell','Mx', 1.e-8*Wb)
 
 amu=named('atomic mass unit', 'amu',1.660538782*10**-27 * kg)
 qe=named('electron charge','qe',1.602176487e-19 * C)
@@ -54,8 +59,17 @@ RSun = named('solar radius', 'RSun', 6.955e8 * m)
 Myr = named('million year', 'Myr', 1000000 * year)
 
 Pa = named('pascal', 'Pa', N / (m ** 2))
-weber = named('weber', 'Wb', kg * m ** 2 * s ** -2 * A ** -1) 
-tesla = named('tesla', 'T', weber / (m ** 2))
+
+Hz = named('hertz', 'Hz', s**-1)
+MHz = named('megahertz', 'MHz', 1e6*Hz)
+
+rad = named('radian','rad',m/m)
+rev=named('revolutions','rev',(2*math.pi) * rad)
+deg=named('degree','deg',(math.pi/180) *  rad)
+arcmin=named('arcminutes', 'arcmin', (1./60) * deg)
+arcsec=named('arcseconds', 'arcsec', (1./3600) * deg)
+
+sr = named('steradian','sr',m**2/m**2)
 
 dm=named('decimeter','dm',0.1*m)
 liter=named('liter','L', dm**3)
